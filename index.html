@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Railway Booking Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .info {
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0 10px;
+      flex-wrap: wrap;
+    }
+
+    .calendar-header button {
+      background: #00ffc8;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 40px);
+      gap: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00f7ff;
+      margin-top: 10px;
+    }
+
+    .day {
+      color: #ccc;
+      font-weight: bold;
+    }
+
+    .date {
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: white;
+    }
+
+    .past {
+      opacity: 0.3;
+    }
+
+    .today {
+      background: #00ffc8;
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚆 Railway Booking Calendar</h1>
+  <div class="info" id="today-display"></div>
+  <div class="info" id="bookable-display"></div>
+
+  <div class="calendar-header">
+    <button onclick="changeMonth(-1)">⬅ Prev</button>
+    <button onclick="goToBookableDate()">🔖 Today</button>
+    <button onclick="changeMonth(1)">Next ➡</button>
+  </div>
+
+  <div class="calendar-title" id="calendar-title" style="font-size: 1.2rem; font-weight: bold;"></div>
+  <div class="calendar" id="calendar"></div>
+
+  <script>
+    const today = new Date();
+    const bookableDate = new Date();
+    bookableDate.setDate(today.getDate() + 60);
+
+    document.getElementById("today-display").innerText = 
+      `📅 Today is: ${today.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+    document.getElementById("bookable-display").innerText = 
+      `🟢 You can now book for: ${bookableDate.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+
+    function renderCalendar(year, month) {
+      const calendar = document.getElementById("calendar");
+      const title = document.getElementById("calendar-title");
+
+      calendar.innerHTML = "";
+
+      const monthName = new Date(year, month).toLocaleString('en-IN', { month: 'long' });
+      title.innerText = `${monthName} ${year}`;
+
+      const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      weekDays.forEach(d => {
+        const dayEl = document.createElement("div");
+        dayEl.innerText = d;
+        dayEl.classList.add("day");
+        calendar.appendChild(dayEl);
+      });
+
+      const firstDay = new Date(year, month, 1);
+      const totalDays = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay.getDay(); i++) {
+        calendar.appendChild(document.createElement("div"));
+      }
+
+      for (let d = 1; d <= totalDays; d++) {
+        const dateObj = new Date(year, month, d);
+        const cell = document.createElement("div");
+        cell.innerText = d;
+        cell.classList.add("date");
+
+        const bookDay = bookableDate.getDate();
+        const bookMonth = bookableDate.getMonth();
+        const bookYear = bookableDate.getFullYear();
+
+        if (dateObj < bookableDate && year === bookYear && month === bookMonth) {
+          cell.classList.add("past");
+        }
+
+        if (d === bookDay && year === bookYear && month === bookMonth) {
+          cell.classList.add("today");
+        }
+
+        calendar.appendChild(cell);
+      }
+    }
+
+    function changeMonth(offset) {
+      currentMonth += offset;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar(currentYear, currentMonth);
+    }
+
+    function goToBookableDate() {
+      currentMonth = bookableDate.getMonth();
+      currentYear = bookableDate.getFullYear();
+      renderCalendar(currentYear, currentMonth);
+    }
+
+    renderCalendar(currentYear, currentMonth);
+  </script>
+</body>
+</html>
